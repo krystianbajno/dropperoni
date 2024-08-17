@@ -29,7 +29,7 @@ Cross-platform file upload/download server and an HTTPS reverse proxy written in
 ./droppa --listen 192.168.1.10 --cert cert.pem --key key.pem # will use custom private key and cert
 ./droppa --listen 192.168.1.10 --issuer example.com --proxy https://exampledomain.com:31337 # will serve as reverse proxy, cert generated dynamically, custom issuer
 ./droppa --listen 192.168.1.10 --proxy https://exampledomain.com:31337 # will serve as reverse proxy, cert generated dynamically
-./droppa --listen 192.168.1.10 --cert cert.pem --key key.pem # will serve as reverse proxy, will use custom private key and cert
+./droppa --listen 192.168.1.10 --cert cert.pem --key key.pem --proxy https://exampledomain.com:31337 # will serve as reverse proxy, will use custom private key and cert
 ```
 
 ### Endpoints
