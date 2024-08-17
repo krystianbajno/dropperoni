@@ -6,7 +6,6 @@ edition = "2021"
 [dependencies]
 rouille = "3.0"
 tokio = { version = "1.30", features = ["full"] }
-reqwest = { version = "0.12.5", features = ["json"] }
 tokio-rustls = "0.26.0"
 rsa = "0.9.6"
 rand = "0.8.5"
