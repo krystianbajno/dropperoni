@@ -9,7 +9,7 @@
 ░▒▓███████▓▒░░▒▓█▓▒░░▒▓█▓▒░░▒▓██████▓▒░░▒▓█▓▒░      ░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░ 
 ```
 
-Cross-platform file upload/download server and an HTTPS reverse proxy written in Rust.
+Portable cross-platform file upload/download server and an HTTPS reverse proxy written in Rust.
 
 ### Features
 - Serves files
