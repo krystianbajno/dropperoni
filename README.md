@@ -1,4 +1,11 @@
 # Droppa
+When you need to drop a file, it needs to be simple, and **quick**.
+You have `nginx`, you have `python -m http.server`, sure.
+
+But this one here weights 3 megabytes, works everywhere, needs no configuration files, and generates SSL certificates during runtime.
+
+It is also a reverse proxy able to perform Man in the Middle.
+
 ```
 ░▒▓███████▓▒░░▒▓███████▓▒░ ░▒▓██████▓▒░░▒▓███████▓▒░░▒▓███████▓▒░ ░▒▓██████▓▒░  
 ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░ 
@@ -7,9 +14,17 @@
 ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░ 
 ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░ 
 ░▒▓███████▓▒░░▒▓█▓▒░░▒▓█▓▒░░▒▓██████▓▒░░▒▓█▓▒░      ░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░ 
+                    
 ```
 
 Portable cross-platform file upload/download server and an HTTPS reverse proxy written in Rust.
+
+### Installation
+```bash
+iwr https://github.com/krystianbajno/droppa/releases/download/release/droppa-x86_64-windows.exe -outfile droppa.exe
+wget https://github.com/krystianbajno/droppa/releases/download/release/droppa-x86_64-linux
+wget https://github.com/krystianbajno/droppa/releases/download/release/droppa-aarch64-apple-darwin
+```
 
 ### Features
 - Serves files
@@ -32,11 +47,28 @@ Portable cross-platform file upload/download server and an HTTPS reverse proxy w
 - `--cert <cert>` (optional): setup TLS using custom private key and cert
 
 ### Examples
+
+Share files in current directory
 ```bash
+./droppa
+```
+
+**Share files in current directory but encrypted**
+```
+./droppa --ssl
+```
+
+**Setup HTTPS reverse proxy**
+```
+./droppa --proxy https://hackhack.com:443 will expose an HTTPS reverse proxy.
+```
+
+**More**
+```
 ./droppa # will listen on 0.0.0.0, port 8000, serve current directory, unencrypted
 ./droppa --directory /usr/share/wordlists # serve directory /usr/share/wordlists
-./droppa --listen 192.168.1.10 --tls # will generate custom cert, serve current directory, listen on addr 192.168.1.10
-./droppa --listen 192.168.1.10 --tls --issuer example.com # will generate custom cert
+./droppa --listen 192.168.1.10 --port 9999 --tls # will generate custom cert, serve current directory, listen on addr 192.168.1.10, port 9999
+./droppa --listen 192.168.1.10 --tls --issuer example.com # will generate custom cert with spoofed example.com issuer
 ./droppa --listen 192.168.1.10 --cert cert.pem --key key.pem # will use custom private key and cert
 ./droppa --listen 192.168.1.10 --issuer example.com --proxy https://exampledomain.com:31337 # will serve as reverse proxy, cert generated dynamically, custom issuer
 ./droppa --listen 192.168.1.10 --proxy https://exampledomain.com:31337 # will serve as reverse proxy, cert generated dynamically
@@ -49,18 +81,11 @@ Portable cross-platform file upload/download server and an HTTPS reverse proxy w
 - **`GET /<file>`** - Download file
 - **`POST /`** - Upload file - `enctype="multipart/form-data"`
 
-### Installation
-```bash
-iwr https://github.com/krystianbajno/droppa/releases/download/release/droppa-x86_64-windows.exe -outfile droppa.exe
-wget https://github.com/krystianbajno/droppa/releases/download/release/droppa-x86_64-linux
-wget https://github.com/krystianbajno/droppa/releases/download/release/droppa-aarch64-apple-darwin
-```
-
 ### MITM
 Modify file mitm_payload.rs. By default it rewrites request Host header to target. TLS proxy needs that in order to work properly.
 
 ### Bring Your Own Keys
-OpenSSL oneliner in bonus
+OpenSSL oneliner bonus
 ```bash
 openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -sha256 -days 3650 -nodes -subj "/C=XX/ST=StateName/L=CityName/O=CompanyName/OU=CompanySectionName/CN=CommonNameOrHostname" -nodes
 ```
