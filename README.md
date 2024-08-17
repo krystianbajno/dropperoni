@@ -6,7 +6,7 @@ Rust file upload/download server and reverse HTTPS proxy.
 - Uploads files
 - Configurable listening address and port.
 - Generates TLS self-signed PKCS8 RSA SHA256 certificates during runtime.
-- Creates encrypted TLS reverse proxy.
+- Runs encrypted TLS reverse proxy.
 
 ### Command-Line Arguments
 ```bash
