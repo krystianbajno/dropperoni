@@ -17,5 +17,5 @@ Cross-platform file upload/download server and an HTTPS reverse proxy written in
 - `--issuer` (optional): set an issuer for self-hosted certificate. Default is getrekt.com
 - `--proxy http(s)://<target_address>:<port>` (optional): setup as a reverse proxy.
 ```bash
-./droppa --listen 0.0.0.0 --port 8000 --tls --issuer example.com --directory .
+./droppa --listen 0.0.0.0 --port 8000 --tls --issuer example.com --proxy https://31.3.3.7:31337 --directory .
 ```
