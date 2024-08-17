@@ -30,3 +30,4 @@ pub fn generate_self_signed_certificate(issuer: &str) -> Result<(Vec<u8>, Vec<u8
 
     Ok((cert_der, private_key_der.to_bytes().to_vec()))
 }
+

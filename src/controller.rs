@@ -4,9 +4,12 @@ use std::fs::{self, File};
 use std::path::PathBuf;
 use std::sync::Arc;
 
+use crate::views::format_index_html;
 
-pub fn index(dir: &PathBuf) -> Vec<String> {
+
+pub fn index(dir: &PathBuf) -> Response {
     let mut files = Vec::new();
+
     if let Ok(entries) = fs::read_dir(dir) {
         for entry in entries {
             if let Ok(entry) = entry {
@@ -20,7 +23,9 @@ pub fn index(dir: &PathBuf) -> Vec<String> {
             }
         }
     }
-    files
+    
+    let body = format_index_html(files);
+    Response::html(body)
 }
 
 pub fn get(request: &Request, dir: &PathBuf) -> Response {
@@ -51,7 +56,7 @@ pub fn store(request: &Request, dir: &Arc<PathBuf>) -> Response {
             let filepath = dir.join(filename);
             let mut file = File::create(filepath).unwrap();
             std::io::copy(&mut field.data, &mut file).unwrap();
-            return Response::html("File uploaded");
+            return index(dir)
         }
     }
 

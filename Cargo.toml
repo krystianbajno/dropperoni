@@ -6,7 +6,7 @@ edition = "2021"
 [dependencies]
 rouille = "3.0"
 tokio = { version = "1.30", features = ["full"] }
-tokio-rustls = "0.26.0"
+tokio-rustls = { version = "0.23.0",  features = ["dangerous_configuration"] }
 rsa = "0.9.6"
 rand = "0.8.5"
 rcgen = "0.11"

