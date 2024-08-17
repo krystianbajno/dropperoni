@@ -120,6 +120,7 @@ async fn handle_connection(
                             response_buffer.clear();
                         } else if headers_parsed {
                             client_stream.write_all(&server_to_client_buffer[..n]).await?;
+                            println!("Forwarded {} bytes to client.", &server_to_client_buffer[..n].len());
                         }
                     }
                     Err(e) => {
