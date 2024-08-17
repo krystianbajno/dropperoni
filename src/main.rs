@@ -8,6 +8,10 @@ mod controller;
 mod routes;
 mod certs;
 mod tls;
+mod compression;
+
+mod mitm_payload;
+mod mitm_handler;
 mod mitm;
 
 #[tokio::main]

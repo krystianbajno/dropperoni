@@ -28,10 +28,11 @@ pub struct DefaultResponseModifier;
 impl ResponseModifier for DefaultResponseModifier {
     fn modify(&self, response: &str, needle: &str, payload: &str) -> String {
         let mut modified_response = String::new();
+        let mut replaced = false;
         for line in response.lines() {
-            if line.contains(needle) {
+            if line.contains(needle) && !replaced {
                 modified_response.push_str(&format!("{}\r\n", payload));
-                modified_response.push_str("\r\n");
+                replaced = true;
             } else {
                 modified_response.push_str(line);
                 modified_response.push_str("\r\n");
@@ -42,8 +43,8 @@ impl ResponseModifier for DefaultResponseModifier {
 }
 
 pub struct MitmBuilder {
-    request_modifier: Option<Box<dyn RequestModifier + Send + Sync>>,
-    response_modifier: Option<Box<dyn ResponseModifier + Send + Sync>>,
+    pub request_modifier: Option<Box<dyn RequestModifier + Send + Sync>>,
+    pub response_modifier: Option<Box<dyn ResponseModifier + Send + Sync>>,
 }
 
 impl MitmBuilder {
@@ -73,16 +74,11 @@ impl MitmBuilder {
 }
 
 pub struct MitmProxy {
-    request_modifier: Box<dyn RequestModifier + Send + Sync>,
-    response_modifier: Box<dyn ResponseModifier + Send + Sync>,
+    pub request_modifier: Box<dyn RequestModifier + Send + Sync>,
+    pub response_modifier: Box<dyn ResponseModifier + Send + Sync>,
 }
 
-impl MitmProxy {
-    pub fn modify_request(&self, request: &str, needle: &str, payload: &str) -> String {
-        self.request_modifier.modify(request, needle, payload)
-    }
-
-    pub fn modify_response(&self, response: &str, needle: &str, payload: &str) -> String {
-        self.response_modifier.modify(response, needle, payload)
-    }
+pub fn is_text_content(headers: &[u8]) -> bool {
+    let headers_str = String::from_utf8_lossy(headers).to_lowercase();
+    headers_str.contains("content-type: text")
 }

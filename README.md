@@ -28,4 +28,4 @@ Cross-platform file upload/download server and an HTTPS reverse proxy written in
 - **`POST /`** - Upload file - `enctype="multipart/form-data"`
 
 ### MITM
-Modify file proxy.rs. By default rewrites request Host header to a domain TLS proxy is connecting to in order to work properly.
+Modify file mitm_payload.rs. By default rewrites request Host header to target. TLS proxy needs that in order to work properly.
