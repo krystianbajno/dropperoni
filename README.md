@@ -1,5 +1,5 @@
 # Droppa
-Rust file upload/download server and reverse HTTPS proxy. 
+File upload/download server and a reverse HTTPS proxy written in Rust.
 
 ### Features
 - Serves files
