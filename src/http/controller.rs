@@ -4,7 +4,7 @@ use std::fs::{self, File};
 use std::path::PathBuf;
 use std::sync::Arc;
 
-use crate::views::format_index_html;
+use crate::views::views::format_index_html;
 
 
 pub fn index(dir: &PathBuf) -> Response {

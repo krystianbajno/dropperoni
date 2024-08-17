@@ -1,17 +1,18 @@
 use std::error::Error;
-use crate::compression::{compress_body, decompress_body, detect_encoding, split_headers_and_body};
-use crate::mitm::{is_text_content, MitmBuilder};
+use crate::transport::compression::{compress_body, decompress_body, detect_encoding, split_headers_and_body};
+use crate::mitm::mitm::{is_text_content, MitmBuilder, RequestModifier, ResponseModifier};
+use crate::mitm::mitm_payload::{CustomRequestModifier, CustomResponseModifier};
 
 pub struct MitmHandler {
-    request_modifier: Box<dyn crate::mitm::RequestModifier + Send + Sync>,
-    response_modifier: Box<dyn crate::mitm::ResponseModifier + Send + Sync>,
+    request_modifier: Box<dyn RequestModifier + Send + Sync>,
+    response_modifier: Box<dyn ResponseModifier + Send + Sync>,
 }
 
 impl MitmHandler {
     pub fn new() -> Self {
         let mitm = MitmBuilder::new()
-            .with_request_modifier(Box::new(crate::mitm_payload::CustomRequestModifier))
-            .with_response_modifier(Box::new(crate::mitm_payload::CustomResponseModifier))
+            .with_request_modifier(Box::new(CustomRequestModifier))
+            .with_response_modifier(Box::new(CustomResponseModifier))
             .build();
 
         MitmHandler {

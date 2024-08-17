@@ -2,7 +2,7 @@ use rouille::{Request, Response};
 use std::path::PathBuf;
 use std::sync::Arc;
 
-use crate::controller::{get, index, store};
+use crate::http::controller::{get, index, store};
 
 pub fn handle_request(request: &Request, dir: &Arc<PathBuf>) -> Response {
     println!("[{}] - {} {} \n{:#?}", request.remote_addr(), request.method(), request.raw_url(), request.headers());

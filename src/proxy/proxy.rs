@@ -6,8 +6,8 @@ use tokio::net::{TcpListener, TcpStream};
 use tokio_rustls::{TlsAcceptor, TlsConnector};
 use tokio_rustls::rustls::ServerName;
 
-use crate::mitm_handler::MitmHandler;
-use crate::tls::{generate_tls_acceptor, generate_tls_connector, MaybeTlsStream};
+use crate::crypto::tls::{generate_tls_acceptor, generate_tls_connector, MaybeTlsStream};
+use crate::mitm::mitm_handler::MitmHandler;
 
 pub async fn start_ssl_proxy(
     server_address: &str,

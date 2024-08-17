@@ -9,7 +9,7 @@ use tokio::net::TcpStream;
 use std::error::Error;
 use tokio_rustls::rustls::client::{ServerCertVerifier, ServerCertVerified};
 
-use crate::certs::generate_self_signed_certificate;
+use crate::crypto::certs::generate_self_signed_certificate;
 
 struct NoCertVerification;
 

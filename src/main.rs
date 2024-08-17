@@ -1,18 +1,14 @@
+mod views;
+mod transport;
+mod proxy;
+mod mitm;
+mod http;
+mod crypto;
+
 use std::{path::PathBuf, sync::Arc};
 use clap::{Arg, Command};
-
-mod server;
-mod proxy;
-mod views;
-mod controller;
-mod routes;
-mod certs;
-mod tls;
-mod compression;
-
-mod mitm_payload;
-mod mitm_handler;
-mod mitm;
+use http::server;
+use proxy::proxy::start_ssl_proxy;
 
 #[tokio::main]
 async fn main() {
@@ -73,7 +69,7 @@ async fn main() {
         let proxy_address = format!("{}:{}", listen_address, port);
         println!("DROPPA: TLS Proxy running on https://{} from directory {}", proxy_address, directory);
 
-        match proxy::start_ssl_proxy(&proxy_address, &target_address, &issuer).await {
+        match start_ssl_proxy(&proxy_address, &target_address, &issuer).await {
             Ok(()) => println!("OK"),
             Err(err) => println!("{:?}", err),
         };
@@ -82,7 +78,7 @@ async fn main() {
         let proxy_address = format!("{}:{}", listen_address, port);
         println!("DROPPA: TLS Proxy running on https://{} -> targeting {}", proxy_address, target_address);
 
-        match proxy::start_ssl_proxy(&proxy_address, &target_address, &issuer).await {
+        match start_ssl_proxy(&proxy_address, &target_address, &issuer).await {
             Ok(()) => println!("OK"),
             Err(err) => println!("{:?}", err),
         };

@@ -1,4 +1,4 @@
-use crate::mitm::{RequestModifier, ResponseModifier, DefaultRequestModifier, DefaultResponseModifier};
+use crate::mitm::mitm::{RequestModifier, ResponseModifier, DefaultRequestModifier, DefaultResponseModifier};
 
 pub struct CustomRequestModifier;
 

@@ -1,4 +1,4 @@
-static INDEX: &str = include_str!("./static/index.html");
+static INDEX: &str = include_str!("../static/index.html");
 
 pub fn format_index_html(files: Vec<String>) -> String {
     let mut file_list = String::new();

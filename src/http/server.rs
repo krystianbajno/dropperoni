@@ -1,7 +1,7 @@
 use std::{path::PathBuf, sync::Arc};
 use rouille;
 
-use crate::routes;
+use crate::http::routes;
 
 pub fn start_rouille_server(address: String, dir: Arc<PathBuf>) {
     std::thread::spawn(move || {
