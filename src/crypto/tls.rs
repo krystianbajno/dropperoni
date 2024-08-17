@@ -1,5 +1,5 @@
 use rustls_pemfile::{certs, pkcs8_private_keys};
-use tokio_rustls::rustls::{self, Certificate, ClientConfig, Error as RustlsError, PrivateKey, RootCertStore, ServerConfig};
+use tokio_rustls::rustls::{Certificate, ClientConfig, Error as RustlsError, PrivateKey, RootCertStore, ServerConfig};
 use tokio_rustls::TlsAcceptor;
 use tokio_rustls::client::TlsStream;
 use std::fs::File;

@@ -40,9 +40,9 @@ Cross-platform file upload/download server and an HTTPS reverse proxy written in
 
 ### Installation
 ```bash
-iwr https://github.com/krystianbajno/droppa/releases/download/droppa/droppa-x86_64-windows.exe -outfile droppa.exe
-wget https://github.com/krystianbajno/droppa/releases/download/droppa/droppa-x86_64-linux
-wget https://github.com/krystianbajno/droppa/releases/download/droppa/droppa-aarch64-apple-darwin
+iwr https://github.com/krystianbajno/droppa/releases/download/release/droppa-x86_64-windows.exe -outfile droppa.exe
+wget https://github.com/krystianbajno/droppa/releases/download/release/droppa-x86_64-linux
+wget https://github.com/krystianbajno/droppa/releases/download/release/droppa-aarch64-apple-darwin
 ```
 
 ### MITM
