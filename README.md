@@ -1,12 +1,12 @@
 # Droppa
-File upload/download server and a reverse HTTPS proxy written in Rust.
+File upload/download server and an HTTPS reverse proxy written in Rust.
 
 ### Features
 - Serves files
 - Uploads files
 - Configurable listening address and port.
 - Generates TLS self-signed PKCS8 RSA SHA256 certificates during runtime.
-- Runs encrypted TLS reverse proxy.
+- Runs HTTPS reverse proxy.
 
 ### Command-Line Arguments
 ```bash
