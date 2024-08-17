@@ -65,7 +65,12 @@ async fn handle_connection(acceptor: TlsAcceptor, stream: TcpStream, target_addr
         }
     };
 
-    let url = format!("http://{}{}", target_address, uri);
+    let url = if !target_address.contains("http") {
+        format!("http://{}{}", target_address, uri)
+    } else {
+        format!("{}{}", target_address, uri)
+    };
+    
     println!("Forwarding request to: {}", url);
 
     let client = Client::new();
@@ -78,6 +83,10 @@ async fn handle_connection(acceptor: TlsAcceptor, stream: TcpStream, target_addr
         "PUT" => {
             let body = extract_body(&request);
             client.put(&url).body(body).send().await?
+        },
+        "PATCH" => {
+            let body = extract_body(&request);
+            client.patch(&url).body(body).send().await?
         },
         "DELETE" => client.delete(&url).send().await?,
         "OPTIONS" => client.request(reqwest::Method::OPTIONS, &url).send().await?,
