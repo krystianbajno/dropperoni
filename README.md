@@ -11,14 +11,25 @@ Cross-platform file upload/download server and an HTTPS reverse proxy written in
 
 ### Command-Line Arguments
 
-- `--listen <address>` (optional): Specify the IP address to listen on. Default is 0.0.0.0.
+- `--listen <address>` (alias: `--host`) (optional): Specify the IP address to listen on. Default is 0.0.0.0.
 - `--port <port>` (optional): Specify the port to listen on. Default is 8000.
 - `--directory <dir>` (optional): specify directory to serve. Default is `.`.
-- `--tls` (alias: `--ssl`) (optional): configures TLS. If specified, the web server will run on `127.0.0.1:<port>`, and the TLS proxy will run on `<listen>:<port>`.
+- `--tls` (alias: `--ssl`) (optional): generates self-hosted cert in runtime and configures TLS. If specified, the web server will run on `127.0.0.1:<port>`, and the TLS proxy will run on `<listen>:<port>`.
 - `--issuer` (optional): set an issuer for self-hosted certificate. Default is getrekt.com
 - `--proxy http(s)://<target_address>:<port>` (optional): setup as a reverse proxy.
+- `--priv <key>` (optional): setup TLS using custom private key and cert
+- `--cert <cert>` (optional): setup TLS using custom private key and cert
+
+### Examples
 ```bash
-./droppa --listen 0.0.0.0 --port 8000 --tls --issuer example.com --proxy https://31.3.3.7:31337 --directory .
+./droppa # will listen on 0.0.0.0, port 8000, serve current directory, unencrypted
+./droppa --directory /usr/share/wordlists # serve directory /usr/share/wordlists
+./droppa --listen 192.168.1.10 --tls # will generate custom cert, serve current directory, listen on addr 192.168.1.10
+./droppa --listen 192.168.1.10 --tls --issuer example.com # will generate custom cert
+./droppa --listen 192.168.1.10 --cert cert.pem --key key.pem # will use custom private key and cert
+./droppa --listen 192.168.1.10 --issuer example.com --proxy https://exampledomain.com:31337 # will serve as reverse proxy, cert generated dynamically, custom issuer
+./droppa --listen 192.168.1.10 --proxy https://exampledomain.com:31337 # will serve as reverse proxy, cert generated dynamically
+./droppa --listen 192.168.1.10 --cert cert.pem --key key.pem # will serve as reverse proxy, will use custom private key and cert
 ```
 
 ### Endpoints
@@ -36,3 +47,9 @@ wget https://github.com/krystianbajno/droppa/releases/download/droppa/droppa-aar
 
 ### MITM
 Modify file mitm_payload.rs. By default it rewrites request Host header to target. TLS proxy needs that in order to work properly.
+
+### Bring Your Own Keys
+OpenSSL oneliner in bonus
+```bash
+openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -sha256 -days 3650 -nodes -subj "/C=XX/ST=StateName/L=CityName/O=CompanyName/OU=CompanySectionName/CN=CommonNameOrHostname" -nodes
+```

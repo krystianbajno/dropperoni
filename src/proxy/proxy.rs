@@ -1,4 +1,5 @@
 use std::error::Error;
+use std::path::Path;
 use std::sync::Arc;
 use std::convert::TryFrom;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
@@ -6,15 +7,20 @@ use tokio::net::{TcpListener, TcpStream};
 use tokio_rustls::{TlsAcceptor, TlsConnector};
 use tokio_rustls::rustls::ServerName;
 
-use crate::crypto::tls::{generate_tls_acceptor, generate_tls_connector, MaybeTlsStream};
+use crate::crypto::tls::{generate_tls_acceptor, generate_tls_connector, prepare_tls_cert, MaybeTlsStream};
 use crate::mitm::mitm_handler::MitmHandler;
 
 pub async fn start_ssl_proxy(
     server_address: &str,
     target_address: &str,
-    ssl_issuer: &str
+    ssl_issuer: &str,
+    private_key_path: Option<&Path>,
+    cert_path: Option<&Path>,
 ) -> Result<(), Box<dyn Error>> {
-    let acceptor = generate_tls_acceptor(ssl_issuer)?;
+    let (cert, private_key) = prepare_tls_cert(ssl_issuer, private_key_path, cert_path)?;
+
+    let acceptor = generate_tls_acceptor(cert, private_key)?;
+
     let listener = TcpListener::bind(server_address).await?;
 
     while let Ok((stream, _)) = listener.accept().await {
@@ -34,7 +40,6 @@ pub async fn start_ssl_proxy(
 
     Ok(())
 }
-
 async fn handle_connection(
     acceptor: TlsAcceptor,
     stream: TcpStream,

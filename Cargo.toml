@@ -1,6 +1,6 @@
 [package]
 name = "droppa"
-version = "1.0.0"
+version = "1.1.0"
 edition = "2021"
 
 [dependencies]
@@ -12,5 +12,6 @@ rand = "0.8.5"
 rcgen = "0.11"
 clap = { version = "4.2", features = ["derive"] }
 pkcs8 = "0.10.2" 
+rustls-pemfile = "1.0"
 pem = "3.0"
 flate2 = "1.0.31"

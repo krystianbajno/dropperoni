@@ -18,6 +18,7 @@ async fn main() {
         .about("A simple file server server with optional TLS")
         .arg(Arg::new("listen")
             .long("listen")
+            .alias("host")
             .value_name("listen")
             .help("Set the listening address")
             .default_value("0.0.0.0")
@@ -51,6 +52,16 @@ async fn main() {
             .value_name("proxy")
             .default_value("")
             .action(clap::ArgAction::Set))
+        .arg(Arg::new("priv")
+            .long("priv")
+            .value_name("private_key")
+            .help("Path to the private key file")
+            .action(clap::ArgAction::Set))
+        .arg(Arg::new("cert")
+            .long("cert")
+            .value_name("certificate")
+            .help("Path to the certificate file")
+            .action(clap::ArgAction::Set))
         .get_matches();
 
     let listen_address = matches.get_one::<String>("listen").unwrap();
@@ -62,33 +73,76 @@ async fn main() {
 
     let dir = Arc::new(PathBuf::from(directory));
 
-    if *enable_ssl {
-        let target_address = format!("127.0.0.1:{}", port);
-        server::start_rouille_server(target_address.clone(), dir.clone());
+    let private_key_path = matches.get_one::<String>("priv").map(PathBuf::from);
+    let cert_path = matches.get_one::<String>("cert").map(PathBuf::from);
 
-        let proxy_address = format!("{}:{}", listen_address, port);
-        println!("DROPPA: TLS Proxy running on https://{} from directory {}", proxy_address, directory);
+    if should_start_tls_proxy(enable_ssl, proxy_target_addr, &private_key_path, &cert_path) {
+        start_tls_proxy(listen_address, port, dir.clone(), issuer, private_key_path.clone(), cert_path.clone()).await;
+    } 
 
-        match start_ssl_proxy(&proxy_address, &target_address, &issuer).await {
-            Ok(()) => println!("OK"),
-            Err(err) => println!("{:?}", err),
-        };
-    } else if !proxy_target_addr.trim().is_empty()  {
-        let target_address = format!("{}", proxy_target_addr);
-        let proxy_address = format!("{}:{}", listen_address, port);
-        println!("DROPPA: TLS Proxy running on https://{} -> targeting {}", proxy_address, target_address);
+    if should_start_plain_server(enable_ssl, proxy_target_addr, &private_key_path, &cert_path)  {
+        start_plain_server(listen_address, port, dir.clone());
+    }
 
-        match start_ssl_proxy(&proxy_address, &target_address, &issuer).await {
-            Ok(()) => println!("OK"),
-            Err(err) => println!("{:?}", err),
-        };
-    } else {
-        let server_address = format!("{}:{}", listen_address, port);
-        server::start_rouille_server(server_address.clone(), dir.clone());
-        println!("DROPPA: Serving on http://{} from directory {}", server_address, directory);
+    if !proxy_target_addr.trim().is_empty() {
+        start_reverse_proxy(listen_address, port, proxy_target_addr, issuer, private_key_path, cert_path).await;
     }
 
     loop {
         std::thread::sleep(std::time::Duration::from_secs(1));
     }
+}
+
+fn should_start_tls_proxy(enable_ssl: &bool, proxy_target_addr: &str, private_key_path: &Option<PathBuf>, cert_path: &Option<PathBuf>) -> bool {
+    proxy_target_addr.is_empty() && (*enable_ssl || (private_key_path.is_some() && cert_path.is_some()))
+}
+
+fn should_start_plain_server(enable_ssl: &bool, proxy_target_addr: &str, private_key_path: &Option<PathBuf>, cert_path: &Option<PathBuf>) -> bool {
+    proxy_target_addr.is_empty() && (!*enable_ssl || !(private_key_path.is_some() || cert_path.is_some()))
+}
+
+
+async fn start_tls_proxy(
+    listen_address: &str,
+    port: &str,
+    dir: Arc<PathBuf>,
+    issuer: &str,
+    private_key_path: Option<PathBuf>,
+    cert_path: Option<PathBuf>,
+) {
+    let target_address = format!("127.0.0.1:{}", port);
+
+    server::start_rouille_server(target_address.clone(), dir.clone());
+
+    let proxy_address = format!("{}:{}", listen_address, port);
+    println!("DROPPA: TLS Proxy running on https://{}, from directory {}", proxy_address, dir.clone().display());
+
+    match start_ssl_proxy(&proxy_address, &target_address, issuer, private_key_path.as_deref(), cert_path.as_deref()).await {
+        Ok(()) => println!("OK"),
+        Err(err) => println!("{:?}", err),
+    };
+}
+
+async fn start_reverse_proxy(
+    listen_address: &str,
+    port: &str,
+    proxy_target_addr: &str,
+    issuer: &str,
+    private_key_path: Option<PathBuf>,
+    cert_path: Option<PathBuf>,
+) {
+    let target_address = format!("{}", proxy_target_addr);
+    let proxy_address = format!("{}:{}", listen_address, port);
+    println!("DROPPA: TLS Proxy running on https://{} -> targeting {}", proxy_address, target_address);
+
+    match start_ssl_proxy(&proxy_address, &target_address, issuer, private_key_path.as_deref(), cert_path.as_deref()).await {
+        Ok(()) => println!("OK"),
+        Err(err) => println!("{:?}", err),
+    };
+}
+
+fn start_plain_server(listen_address: &str, port: &str, dir: Arc<PathBuf>) {
+    let server_address = format!("{}:{}", listen_address, port);
+    server::start_rouille_server(server_address.clone(), dir.clone());
+    println!("DROPPA: Serving on http://{} from directory {}", server_address, dir.display());
 }
