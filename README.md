@@ -7,7 +7,7 @@ Cross-platform file upload/download server and an HTTPS reverse proxy written in
 - Configurable listening address and port.
 - Generates TLS self-signed PKCS8 RSA SHA256 certificates during runtime.
 - Runs HTTPS reverse proxy.
-- Gets traffic, decrypts traffic, (MITM), encrypts traffic, sends traffic.
+- Gets traffic, decrypts traffic, (you are here - rewrite request, rewrite response), encrypts traffic, sends traffic.
 
 ### Command-Line Arguments
 
@@ -23,7 +23,9 @@ Cross-platform file upload/download server and an HTTPS reverse proxy written in
 
 ### Endpoints
 
+- **`GET /`** - Index files
+- **`GET /<file>`** - Download file
+- **`POST /`** - Upload file - `enctype="multipart/form-data"`
 
-**`GET /`** - Index files
-**`GET /<file>`** - Download file
-**`POST /`** - Upload file - `enctype="multipart/form-data"`
+### MITM
+Modify file proxy.rs. By default rewrites request Host header to a domain TLS proxy is connecting to in order to work properly.

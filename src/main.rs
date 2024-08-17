@@ -8,6 +8,7 @@ mod controller;
 mod routes;
 mod certs;
 mod tls;
+mod mitm;
 
 #[tokio::main]
 async fn main() {

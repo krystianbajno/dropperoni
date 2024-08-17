@@ -1,15 +1,33 @@
 use std::error::Error;
-use tokio::io::AsyncReadExt;
-use tokio::io::AsyncWriteExt;
-use tokio::net::TcpListener;
-use tokio::net::TcpStream;
-use tokio_rustls::TlsAcceptor;
-use tokio_rustls::TlsConnector;
-use tokio_rustls::rustls::ServerName;
 use std::sync::Arc;
 use std::convert::TryFrom;
+use tokio::io::{AsyncReadExt, AsyncWriteExt};
+use tokio::net::{TcpListener, TcpStream};
+use tokio_rustls::{TlsAcceptor, TlsConnector};
+use tokio_rustls::rustls::ServerName;
 
 use crate::tls::{generate_tls_acceptor, generate_tls_connector, MaybeTlsStream};
+use crate::mitm::{MitmBuilder, RequestModifier, ResponseModifier, DefaultRequestModifier, DefaultResponseModifier};
+
+struct CustomRequestModifier;
+
+impl RequestModifier for CustomRequestModifier {
+    fn modify(&self, request: &str, needle: &str, payload: &str) -> String {
+        // Modifying the HOST header is important for proxy to work correctly.
+        let payload = format!("Host: {}", payload);
+        DefaultRequestModifier.modify(request, "Host:", &payload)
+    }
+}
+
+struct CustomResponseModifier;
+
+impl ResponseModifier for CustomResponseModifier {
+    fn modify(&self, response: &str, _needle: &str, _payload: &str) -> String {
+        // Custom logic for modifying the response
+        //DefaultResponseModifier.modify(response, "", "")
+        response.to_string()
+    }
+}
 
 pub async fn start_ssl_proxy(server_address: &str, target_address: &str, ssl_issuer: &str) -> Result<(), Box<dyn Error>> {
     let acceptor = generate_tls_acceptor(ssl_issuer)?;
@@ -35,6 +53,12 @@ pub async fn start_ssl_proxy(server_address: &str, target_address: &str, ssl_iss
 
 async fn handle_connection(acceptor: TlsAcceptor, stream: TcpStream, target_address: String) -> Result<(), Box<dyn Error>> {
     println!("Accepted connection from client.");
+
+    // Build the MITM proxy with custom modifiers
+    let mitm = MitmBuilder::new()
+        .with_request_modifier(Box::new(CustomRequestModifier)) 
+        .with_response_modifier(Box::new(CustomResponseModifier))
+        .build();
 
     // Accept TLS connection from client
     let mut client_stream = acceptor.accept(stream).await?;
@@ -82,10 +106,10 @@ async fn handle_connection(acceptor: TlsAcceptor, stream: TcpStream, target_addr
                 }
                 println!("Read {} bytes from client", n);
 
-                // Parse and modify the HTTP request header - MITM MITM
+                // Use MITM to modify the HTTP request header
                 if let Ok(decoded) = std::str::from_utf8(&client_to_server_buffer[..n]) {
                     println!("\n\nReceived from client:\n{}\n\n", decoded);
-                    let modified_request = modify_host_header(decoded, &domain);
+                    let modified_request = mitm.modify_request(decoded, "", &domain);
                     server_stream.write_all(modified_request.as_bytes()).await?;
                 } else {
                     server_stream.write_all(&client_to_server_buffer[..n]).await?;
@@ -93,7 +117,7 @@ async fn handle_connection(acceptor: TlsAcceptor, stream: TcpStream, target_addr
 
                 println!("Forwarded {} bytes to server.", n);
             }
-    
+
             server_read = server_stream.read(&mut server_to_client_buffer) => {
                 match server_read {
                     Ok(n) => {
@@ -103,10 +127,10 @@ async fn handle_connection(acceptor: TlsAcceptor, stream: TcpStream, target_addr
                         }
                         println!("Read {} bytes from server", n);
 
-                        // Parse and modify the HTTP response - MITM MITM
+                        // Use MITM to modify the HTTP response
                         if let Ok(decoded) = std::str::from_utf8(&server_to_client_buffer[..n]) {
                             println!("\n\nReceived from server:\n{}\n\n", decoded);
-                            let modified_response = modify_response(decoded);
+                            let modified_response = mitm.modify_response(decoded, "", "");
                             client_stream.write_all(modified_response.as_bytes()).await?;
                         } else {
                             client_stream.write_all(&server_to_client_buffer[..n]).await?;
@@ -124,40 +148,4 @@ async fn handle_connection(acceptor: TlsAcceptor, stream: TcpStream, target_addr
     }
 
     Ok(())
-}
-
-// mitm mitm
-fn modify_host_header(request: &str, domain: &str) -> String {
-    let mut modified_request = String::new();
-    for line in request.lines() {
-        if line.starts_with("Host:") {
-            modified_request.push_str(&format!("Host: {}\r\n", domain));
-            println!("------------ MODIFIED HOST HEADER! ---------------");
-            println!("++++ Host: {}\r\n", domain)
-        } else {
-            modified_request.push_str(line);
-            modified_request.push_str("\r\n");
-        }
-    }
-    modified_request
-}
-
-
-// MITM MITM
-fn modify_response(response: &str) -> String {
-    let mut modified_response = String::new();
-
-    for line in response.lines() {
-        if line.contains("<head>") {
-            let payload = &format!("<head><script>alert(1)</script>");
-            modified_response.push_str(payload);
-            println!("------------ MODIFIED WEBSITE! ---------------");
-            println!("++++ <head>: {}\r\n", payload)
-        }  else {
-            modified_response.push_str(line);
-            modified_response.push_str("\r\n");
-        }
-    }
-
-    modified_response
 }
