@@ -28,8 +28,8 @@ wget https://github.com/krystianbajno/DROPPER/releases/download/release/dropper-
 ```
 
 ### Features
-- Serves files
-- Uploads files
+- Serves files + Web GUI
+- Uploads files + Web GUI
 - Configurable listening address and port.
 - Generates TLS self-signed PKCS8 RSA SHA256 certificates during runtime.
 - Can import your custom PEM Private Key and Cert for TLS.
