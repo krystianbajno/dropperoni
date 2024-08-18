@@ -1,4 +1,4 @@
-# Dropper
+# DROPPER
 When you need to drop a file, it needs to be simple, and **quick**.
 You have `nginx`, you have `python -m http.server`, sure.
 
@@ -22,9 +22,9 @@ Portable cross-platform file upload/download server and an HTTPS reverse proxy w
 
 ### Installation
 ```bash
-iwr https://github.com/krystianbajno/dropper/releases/download/release/dropper-x86_64-windows.exe -outfile dropper.exe
-wget https://github.com/krystianbajno/dropper/releases/download/release/dropper-x86_64-linux
-wget https://github.com/krystianbajno/dropper/releases/download/release/dropper-aarch64-apple-darwin
+iwr https://github.com/krystianbajno/DROPPER/releases/download/release/dropper-x86_64-windows.exe -outfile dropper.exe
+wget https://github.com/krystianbajno/DROPPER/releases/download/release/dropper-x86_64-linux
+wget https://github.com/krystianbajno/DROPPER/releases/download/release/dropper-aarch64-apple-darwin
 ```
 
 ### Features
