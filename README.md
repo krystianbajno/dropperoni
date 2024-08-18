@@ -34,7 +34,7 @@ wget https://github.com/krystianbajno/DROPPER/releases/download/release/dropper-
 - Generates TLS self-signed PKCS8 RSA SHA256 certificates during runtime.
 - Can import your custom PEM Private Key and Cert for TLS.
 - Runs HTTPS reverse proxy.
-- Gets traffic, decrypts traffic, (you are here - rewrite request, rewrite response), encrypts traffic, sends traffic.
+- Gets traffic, decrypts traffic, modifies traffic, encrypts traffic, sends traffic.
 
 ### Command-Line Arguments
 
