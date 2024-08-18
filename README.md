@@ -85,6 +85,8 @@ DROPPER is able to perform a Man in the Middle. It can get a request from client
 Modify file mitm_payload.rs. By default it rewrites request Host header to match the target domain. This TLS proxy setup needs that in order to work properly.
 
 ### Bring Your Own Keys
+Apart from runtime certificate generation, DROPPER has capability to load your own certificates.
+
 OpenSSL oneliner bonus
 ```bash
 openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -sha256 -days 3650 -nodes -subj "/C=XX/ST=StateName/L=CityName/O=CompanyName/OU=CompanySectionName/CN=CommonNameOrHostname" -nodes
