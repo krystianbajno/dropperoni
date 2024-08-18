@@ -1,6 +1,6 @@
-# Droppa
+# Dropper
 When you need to drop a file, it needs to be simple, and **quick**.
-You have `nginx`, you have `python -m http.server`, sure.
+You have `nginx`§, you have `python -m http.server`, sure.
 
 But this one here weights 3 megabytes, has upload, works everywhere, needs no configuration files, and generates TLS certificates during runtime.
 
@@ -21,9 +21,9 @@ Portable cross-platform file upload/download server and an HTTPS reverse proxy w
 
 ### Installation
 ```bash
-iwr https://github.com/krystianbajno/droppa/releases/download/release/droppa-x86_64-windows.exe -outfile droppa.exe
-wget https://github.com/krystianbajno/droppa/releases/download/release/droppa-x86_64-linux
-wget https://github.com/krystianbajno/droppa/releases/download/release/droppa-aarch64-apple-darwin
+iwr https://github.com/krystianbajno/dropper/releases/download/release/dropper-x86_64-windows.exe -outfile dropper.exe
+wget https://github.com/krystianbajno/dropper/releases/download/release/dropper-x86_64-linux
+wget https://github.com/krystianbajno/dropper/releases/download/release/dropper-aarch64-apple-darwin
 ```
 
 ### Features
@@ -50,29 +50,29 @@ wget https://github.com/krystianbajno/droppa/releases/download/release/droppa-aa
 
 Share files in current directory
 ```bash
-./droppa
+./dropper
 ```
 
 **Share files in current directory but encrypted**
 ```
-./droppa --ssl
+./dropper --ssl
 ```
 
 **Setup HTTPS reverse proxy**
 ```
-./droppa --proxy https://hackhack.com:443
+./dropper --proxy https://hackhack.com:443
 ```
 
 **More**
 ```
-./droppa # will listen on 0.0.0.0, port 8000, serve current directory, unencrypted
-./droppa --directory /usr/share/wordlists # serve directory /usr/share/wordlists
-./droppa --listen 192.168.1.10 --port 9999 --tls # will generate custom cert, serve current directory, listen on addr 192.168.1.10, port 9999
-./droppa --listen 192.168.1.10 --tls --issuer example.com # will generate custom cert with spoofed example.com issuer
-./droppa --listen 192.168.1.10 --cert cert.pem --key key.pem # will use custom private key and cert
-./droppa --listen 192.168.1.10 --issuer example.com --proxy https://exampledomain.com:31337 # will serve as reverse proxy, cert generated dynamically, custom issuer
-./droppa --listen 192.168.1.10 --proxy https://exampledomain.com:31337 # will serve as reverse proxy, cert generated dynamically
-./droppa --listen 192.168.1.10 --cert cert.pem --key key.pem --proxy https://exampledomain.com:31337 # will serve as reverse proxy, will use custom private key and cert
+./dropper # will listen on 0.0.0.0, port 8000, serve current directory, unencrypted
+./dropper --directory /usr/share/wordlists # serve directory /usr/share/wordlists
+./dropper --listen 192.168.1.10 --port 9999 --tls # will generate custom cert, serve current directory, listen on addr 192.168.1.10, port 9999
+./dropper --listen 192.168.1.10 --tls --issuer example.com # will generate custom cert with spoofed example.com issuer
+./dropper --listen 192.168.1.10 --cert cert.pem --key key.pem # will use custom private key and cert
+./dropper --listen 192.168.1.10 --issuer example.com --proxy https://exampledomain.com:31337 # will serve as reverse proxy, cert generated dynamically, custom issuer
+./dropper --listen 192.168.1.10 --proxy https://exampledomain.com:31337 # will serve as reverse proxy, cert generated dynamically
+./dropper --listen 192.168.1.10 --cert cert.pem --key key.pem --proxy https://exampledomain.com:31337 # will serve as reverse proxy, will use custom private key and cert
 ```
 
 ### Endpoints
