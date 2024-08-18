@@ -4,28 +4,38 @@ use std::fs::{self, File};
 use std::path::PathBuf;
 use std::sync::Arc;
 
-use crate::views::views::format_index_html;
+use crate::views::views::index_view;
 
 
 pub fn index(dir: &PathBuf) -> Response {
     let mut files = Vec::new();
 
-    if let Ok(entries) = fs::read_dir(dir) {
-        for entry in entries {
-            if let Ok(entry) = entry {
-                if let Ok(file_type) = entry.file_type() {
-                    if file_type.is_file() {
-                        if let Some(file_name) = entry.file_name().to_str() {
-                            files.push(file_name.to_string());
-                        }
-                    }
-                }
-            }
+    let entries = match fs::read_dir(dir) {
+        Ok(entries) => entries,
+        Err(_) => return Response::html(index_view(files)),
+    };
+
+    for entry in entries {
+        let entry = match entry {
+            Ok(entry) => entry,
+            Err(_) => continue,
+        };
+
+        let file_type = match entry.file_type() {
+            Ok(file_type) => file_type,
+            Err(_) => continue,
+        };
+
+        if !file_type.is_file() {
+            continue;
+        }
+
+        if let Some(file_name) = entry.file_name().to_str() {
+            files.push(file_name.to_string());
         }
     }
-    
-    let body = format_index_html(files);
-    Response::html(body)
+
+    Response::html(index_view(files))
 }
 
 pub fn get(request: &Request, dir: &PathBuf) -> Response {
