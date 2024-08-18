@@ -4,8 +4,6 @@ You have `nginx`, you have `python -m http.server`, sure.
 
 But this one here weights 3 megabytes, has upload, works everywhere, needs no configuration files, and generates TLS certificates during runtime.
 
-It is also a reverse proxy able to perform a Man in the Middle.
-
 ```
 ░▒▓███████▓▒░░▒▓███████▓▒░ ░▒▓██████▓▒░░▒▓███████▓▒░░▒▓███████▓▒░░▒▓████████▓▒░▒▓███████▓▒░  
 ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░ 
@@ -83,7 +81,8 @@ Share files in current directory
 - **`POST /`** - Upload file - `enctype="multipart/form-data"`
 
 ### MITM
-Modify file mitm_payload.rs. By default it rewrites request Host header to target. TLS proxy needs that in order to work properly.
+DROPPER is able to perform a Man in the Middle. It can get a request from client, decrypt it, process, re-encrypt. and pass it to target.
+Modify file mitm_payload.rs. By default it rewrites request Host header to match the target domain. This TLS proxy setup needs that in order to work properly.
 
 ### Bring Your Own Keys
 OpenSSL oneliner bonus
