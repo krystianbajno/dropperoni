@@ -60,7 +60,7 @@ Share files in current directory
 
 **Setup HTTPS reverse proxy**
 ```
-./droppa --proxy https://hackhack.com:443 will expose an HTTPS reverse proxy.
+./droppa --proxy https://hackhack.com:443
 ```
 
 **More**
