@@ -2,7 +2,7 @@
 When you need to drop a file, it needs to be simple, and **quick**.
 You have `nginx`, you have `python -m http.server`, sure.
 
-But this one here weights 3 megabytes, works everywhere, needs no configuration files, and generates SSL certificates during runtime.
+But this one here weights 3 megabytes, has upload, works everywhere, needs no configuration files, and generates SSL certificates during runtime.
 
 It is also a reverse proxy able to perform Man in the Middle.
 
