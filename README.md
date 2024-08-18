@@ -15,7 +15,7 @@ It is also a reverse proxy able to perform a Man in the Middle.
 ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░      ░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░ 
 ░▒▓███████▓▒░░▒▓█▓▒░░▒▓█▓▒░░▒▓██████▓▒░░▒▓█▓▒░      ░▒▓█▓▒░      ░▒▓████████▓▒░▒▓█▓▒░░▒▓█▓▒░ 
                                                                                              
-                                                                         Krystian Bajno 2024
+                                                                        Krystian Bajno 2024
 ```
 
 Portable cross-platform file upload/download server and an HTTPS reverse proxy written in Rust.
