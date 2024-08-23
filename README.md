@@ -1,4 +1,4 @@
-# DROPPER
+# DROPPA
 When you need to drop a file, it needs to be simple, and **quick**.
 You have `nginx`, you have `python -m http.server`, sure.
 
@@ -49,29 +49,29 @@ wget https://github.com/krystianbajno/droppa/releases/download/release/droppa-aa
 
 Share files in current directory
 ```bash
-./dropper
+./droppa
 ```
 
 **Share files in current directory but encrypted**
 ```
-./dropper --ssl
+./droppa --ssl
 ```
 
 **Setup HTTPS reverse proxy**
 ```
-./dropper --proxy https://hackhack.com:443
+./droppa --proxy https://hackhack.com:443
 ```
 
 **More**
 ```
-./dropper # will listen on 0.0.0.0, port 8000, serve current directory, unencrypted
-./dropper --directory /usr/share/wordlists # serve directory /usr/share/wordlists
-./dropper --listen 192.168.1.10 --port 9999 --tls # will generate custom cert, serve current directory, listen on addr 192.168.1.10, port 9999
-./dropper --listen 192.168.1.10 --tls --issuer example.com # will generate custom cert with spoofed example.com issuer
-./dropper --listen 192.168.1.10 --cert cert.pem --key key.pem # will use custom private key and cert
-./dropper --listen 192.168.1.10 --issuer example.com --proxy https://exampledomain.com:31337 # will serve as reverse proxy, cert generated dynamically, custom issuer
-./dropper --listen 192.168.1.10 --proxy https://exampledomain.com:31337 # will serve as reverse proxy, cert generated dynamically
-./dropper --listen 192.168.1.10 --cert cert.pem --key key.pem --proxy https://exampledomain.com:31337 # will serve as reverse proxy, will use custom private key and cert
+./droppa # will listen on 0.0.0.0, port 8000, serve current directory, unencrypted
+./droppa --directory /usr/share/wordlists # serve directory /usr/share/wordlists
+./droppa --listen 192.168.1.10 --port 9999 --tls # will generate custom cert, serve current directory, listen on addr 192.168.1.10, port 9999
+./droppa --listen 192.168.1.10 --tls --issuer example.com # will generate custom cert with spoofed example.com issuer
+./droppa --listen 192.168.1.10 --cert cert.pem --key key.pem # will use custom private key and cert
+./droppa --listen 192.168.1.10 --issuer example.com --proxy https://exampledomain.com:31337 # will serve as reverse proxy, cert generated dynamically, custom issuer
+./droppa --listen 192.168.1.10 --proxy https://exampledomain.com:31337 # will serve as reverse proxy, cert generated dynamically
+./droppa --listen 192.168.1.10 --cert cert.pem --key key.pem --proxy https://exampledomain.com:31337 # will serve as reverse proxy, will use custom private key and cert
 ```
 
 ### Endpoints
@@ -81,11 +81,11 @@ Share files in current directory
 - **`POST /`** - Upload file - `enctype="multipart/form-data"`
 
 ### MITM
-DROPPER is able to perform a Man in the Middle. It can get a request from client, decrypt it, process, re-encrypt. and pass it to target.
+DROPPA is able to perform a Man in the Middle. It can get a request from client, decrypt it, process, re-encrypt. and pass it to target.
 Modify file mitm_payload.rs. By default it rewrites request Host header to match the target domain. This TLS proxy setup needs that in order to work properly.
 
 ### Bring Your Own Keys
-Apart from runtime certificate generation, DROPPER has capability to load your own certificates.
+Apart from runtime certificate generation, DROPPA has capability to load your own certificates.
 
 OpenSSL oneliner bonus
 ```bash
