@@ -81,7 +81,7 @@ Share files in current directory
 - **`POST /`** - Upload file - `enctype="multipart/form-data"`
 
 ### MITM
-DROPPA is able to perform a Man in the Middle. It can get a request from client, decrypt it, process, re-encrypt. and pass it to target.
+DROPPA is able to perform Man in the Middle. It can get a request from client, decrypt it, process, re-encrypt. and pass it to target.
 Modify file mitm_payload.rs. By default it rewrites request Host header to match the target domain. This TLS proxy setup needs that in order to work properly.
 
 ### Bring Your Own Keys
