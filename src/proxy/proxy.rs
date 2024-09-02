@@ -6,6 +6,7 @@ use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream};
 use tokio_rustls::{TlsAcceptor, TlsConnector};
 use tokio_rustls::rustls::ServerName;
+use colored::*;
 
 use crate::crypto::tls::{generate_tls_acceptor, generate_tls_connector, prepare_tls_cert, MaybeTlsStream};
 use crate::mitm::mitm_handler::MitmHandler;
@@ -26,31 +27,32 @@ pub async fn start_ssl_proxy(
     while let Ok((stream, _)) = listener.accept().await {
         let ip = stream.peer_addr().unwrap().ip();
         let port = stream.peer_addr().unwrap().port();
-        println!("{ip}:{port} - Accepted a new TLS connection");
+        println!("{}", format!("{ip}:{port} - Accepted a new TLS connection").green());
 
         let acceptor = acceptor.clone();
         let target_address = target_address.to_string();
 
         tokio::spawn(async move {
             if let Err(e) = handle_connection(acceptor, stream, target_address).await {
-                eprintln!("Error handling connection: {:?}", e);
+                eprintln!("{}", format!("Error handling connection: {:?}", e).red());
             }
         });
     }
 
     Ok(())
 }
+
 async fn handle_connection(
     acceptor: TlsAcceptor,
     stream: TcpStream,
     target_address: String,
 ) -> Result<(), Box<dyn Error>> {
-    println!("Accepted connection from client.");
+    println!("{}", "Accepted connection from client.".cyan());
 
     let mitm_handler = MitmHandler::new();
 
     let mut client_stream = acceptor.accept(stream).await?;
-    println!("TLS handshake with client successful.");
+    println!("{}", "TLS handshake with client successful.".cyan());
 
     let (trim_target_address, domain, is_target_https) = {
         let trim_target_address = target_address.trim_start_matches("https://").trim_start_matches("http://");
@@ -61,21 +63,21 @@ async fn handle_connection(
     };
 
     let mut server_stream = if is_target_https {
-        println!("Connecting to target (TLS): {}", trim_target_address);
+        println!("{}", format!("Connecting to target (TLS): {}", trim_target_address).green());
 
         let connector = generate_tls_connector()?;
         let server_name = ServerName::try_from(domain.as_str()).map_err(|_| "Invalid domain for ServerName")?;
 
         let stream = TcpStream::connect(trim_target_address).await?;
         let server_stream = TlsConnector::from(Arc::new(connector)).connect(server_name, stream).await?;
-        println!("TLS handshake with server successful.");
+        println!("{}", "TLS handshake with server successful.".green());
 
         MaybeTlsStream::Tls(server_stream)
     } else {
-        println!("Connecting to target (plain): {}", trim_target_address);
+        println!("{}", format!("Connecting to target (plain): {}", trim_target_address).green());
 
         let server_stream = TcpStream::connect(trim_target_address).await?;
-        println!("Connected to target (plain).");
+        println!("{}", "Connected to target (plain).".green());
 
         MaybeTlsStream::Plain(server_stream)
     };
@@ -90,26 +92,28 @@ async fn handle_connection(
             client_read = client_stream.read(&mut client_to_server_buffer) => {
                 let n = client_read?;
                 if n == 0 {
-                    println!("Client closed the connection.");
+                    println!("{}", "Client closed the connection.".cyan());
                     break;
                 }
-                println!("Read {} bytes from client", n);
+                println!("{}", format!("Read {} bytes from client", n).cyan());
+                println!("{}", format!("Client data:\n{}", String::from_utf8_lossy(&client_to_server_buffer[..n])).cyan());
 
                 let modified_request = mitm_handler.process_request(&client_to_server_buffer[..n], &domain)?;
 
                 server_stream.write_all(&modified_request).await?;
 
-                println!("Forwarded {} bytes to server.", n);
+                println!("{}", format!("Forwarded {} bytes to server.", n).cyan());
             }
 
             server_read = server_stream.read(&mut server_to_client_buffer) => {
                 match server_read {
                     Ok(n) => {
                         if n == 0 {
-                            println!("Server closed the connection.");
+                            println!("{}", "Server closed the connection.".green());
                             break;
                         }
-                        println!("Read {} bytes from server", n);
+                        println!("{}", format!("Read {} bytes from server", n).green());
+                        println!("{}", format!("Server data:\n{}", String::from_utf8_lossy(&server_to_client_buffer[..n])).green());
 
                         response_buffer.extend_from_slice(&server_to_client_buffer[..n]);
 
@@ -120,16 +124,16 @@ async fn handle_connection(
 
                             client_stream.write_all(&modified_response).await?;
 
-                            println!("Forwarded {} bytes to client.", modified_response.len());
+                            println!("{}", format!("Forwarded {} bytes to client.", modified_response.len()).green());
 
                             response_buffer.clear();
                         } else if headers_parsed {
                             client_stream.write_all(&server_to_client_buffer[..n]).await?;
-                            println!("Forwarded {} bytes to client.", &server_to_client_buffer[..n].len());
+                            println!("{}", format!("Forwarded {} bytes to client.", &server_to_client_buffer[..n].len()).green());
                         }
                     }
                     Err(e) => {
-                        eprintln!("Failed to read from server: {}", e);
+                        eprintln!("{}", format!("Failed to read from server: {}", e).red());
                         break;
                     }
                 }

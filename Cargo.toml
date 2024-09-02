@@ -1,5 +1,5 @@
 [package]
-name = "dropper"
+name = "droppa"
 version = "1.1.0"
 edition = "2021"
 
@@ -15,3 +15,6 @@ pkcs8 = "0.10.2"
 rustls-pemfile = "1.0"
 pem = "3.0"
 flate2 = "1.0.31"
+url = "2.2.2"
+colored = "2.0.0"
+ammonia = "4.0.0"

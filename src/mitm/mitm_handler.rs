@@ -27,7 +27,6 @@ impl MitmHandler {
         domain: &str,
     ) -> Result<Vec<u8>, Box<dyn Error>> {
         if let Ok(decoded) = std::str::from_utf8(request_data) {
-            println!("\n\nReceived from client:\n{}\n\n", decoded);
             let modified_request = self.modify_request(decoded, "", domain);
             Ok(modified_request.into_bytes())
         } else {
