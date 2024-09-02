@@ -2,7 +2,7 @@ use ammonia::clean;
 use rouille::input::multipart::{get_multipart_input, MultipartError};
 use rouille::{Request, Response};
 use std::fs::{self, File};
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::sync::Arc;
 use crate::views::views::index_view;
 
@@ -38,21 +38,8 @@ pub fn index(request: &Request, dir: &PathBuf) -> Response {
     Response::html(index_view(files))
 }
 
-fn is_within_dir(base: &Path, target: &Path) -> bool {
-    match target.canonicalize() {
-        Ok(canonical_target) => canonical_target.starts_with(base),
-        Err(_) => false,
-    }
-}
-
 pub fn get(request: &Request, dir: &PathBuf) -> Response {
     let filepath = dir.join(&request.url()[1..]);
-    
-    // Prevent path traversal by ensuring the final path is within the intended directory
-    if !is_within_dir(dir, &filepath) {
-        return Response::empty_404();
-    }
-    
     if filepath.is_file() {
         match fs::read(filepath) {
             Ok(content) => Response::from_data("application/octet-stream", content),
@@ -77,16 +64,10 @@ pub fn store(request: &Request, dir: &Arc<PathBuf>) -> Response {
     while let Some(mut field) = multipart.next() {
         if let Some(filename) = field.headers.filename.clone() {
             let sanitized_filename = clean(&filename);
-
-            // Prevent path traversal by ensuring the final path is within the intended directory
             let filepath = dir.join(sanitized_filename.to_string());
-            if !is_within_dir(dir, &filepath) {
-                return Response::text("Invalid file path").with_status_code(400);
-            }
-
             let mut file = File::create(filepath).unwrap();
             std::io::copy(&mut field.data, &mut file).unwrap();
-            return index(request, dir);
+            return index(request, dir)
         }
     }
 
