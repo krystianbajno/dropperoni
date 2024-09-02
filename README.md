@@ -84,6 +84,8 @@ Share files in current directory
 DROPPA is able to perform Man in the Middle. It can get a request from client, decrypt it, process, re-encrypt. and pass it to target.
 Modify file mitm_payload.rs. By default it rewrites request Host header to match the target domain. This TLS proxy setup needs that in order to work properly.
 
+It intercepts, decrypts, and logs every request and every response (both headers and body) on proxy and droppa server.
+
 ### Bring Your Own Keys
 Apart from runtime certificate generation, DROPPA has capability to load your own certificates.
 
