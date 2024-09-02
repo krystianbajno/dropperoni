@@ -18,3 +18,10 @@ flate2 = "1.0.31"
 url = "2.2.2"
 colored = "2.0.0"
 ammonia = "4.0.0"
+
+[profile.release]
+opt-level = "z" 
+strip = true
+lto = true
+codegen-units = 1
+panic = "abort"
