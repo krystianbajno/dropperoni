@@ -7,16 +7,17 @@ pub fn intercept_request(request: &Request) {
     pretty_print_headers(request);
 
     match request.method() {
-        "POST" => {
-            match handle_post_request(request) {
-                Ok(parsed_data) => println!("{}", format!("Parsed POST data:\n{}", parsed_data).cyan()),
-                Err(err_msg) => eprintln!("{}", err_msg.red()),
-            }
-        },
-        "GET" => {
-            let parsed_query = handle_get_request(request);
-            println!("{}", format!("Parsed GET query:\n{}", parsed_query).cyan());
-        },
+        // no need to mitm here lol
+        // "POST" => {
+        //     match handle_post_request(request) {
+        //         Ok(parsed_data) => println!("{}", format!("Parsed POST data:\n{}", parsed_data).cyan()),
+        //         Err(err_msg) => eprintln!("{}", err_msg.red()),
+        //     }
+        // },
+        // "GET" => {
+        //     let parsed_query = handle_get_request(request);
+        //     println!("{}", format!("Parsed GET query:\n{}", parsed_query).cyan());
+        // },
         _ => {}
     }
 }
@@ -73,28 +74,34 @@ pub fn intercept_response(response: Response) -> Response {
         println!("{}", format!("  {}: {}", key, value).green());
     }
 
-    let (mut body_reader, body_size) = response.data.into_reader_and_size();
+    println!();
 
-    let mut body_buf = Vec::new();
-    if body_reader.read_to_end(&mut body_buf).is_ok() {
-        if let Ok(body_str) = String::from_utf8(body_buf.clone()) {
-            println!("{}", format!("Body ({} bytes):\n{}", body_size.unwrap_or(body_buf.len()), body_str).green());
-        } else {
-            println!("{}", format!("Body ({} bytes, binary):\n{:?}", body_size.unwrap_or(body_buf.len()), body_buf).green());
-        }
-    } else {
-        println!("{}", "Failed to read the body.".red());
-    }
+    response
 
-    println!(); 
+    // no need for mitm here lol
 
-    let mut new_response = Response::from_data("application/octet-stream", body_buf);
-    for (key, value) in &response.headers {
-        new_response = new_response.with_additional_header(
-            key.clone().into_owned(),
-            value.clone().into_owned(), 
-        );
-    }
+    // let (mut body_reader, body_size) = response.data.into_reader_and_size();
 
-    new_response.with_status_code(response.status_code)
+    // let mut body_buf = Vec::new();
+    // if body_reader.read_to_end(&mut body_buf).is_ok() {
+    //     if let Ok(body_str) = String::from_utf8(body_buf.clone()) {
+    //         println!("{}", format!("Body ({} bytes):\n{}", body_size.unwrap_or(body_buf.len()), body_str).green());
+    //     } else {
+    //         println!("{}", format!("Body ({} bytes, binary):\n{:?}", body_size.unwrap_or(body_buf.len()), body_buf).green());
+    //     }
+    // } else {
+    //     println!("{}", "Failed to read the body.".red());
+    // }
+
+    // println!(); 
+
+    // let mut new_response = Response::from_data("application/octet-stream", body_buf);
+    // for (key, value) in &response.headers {
+    //     new_response = new_response.with_additional_header(
+    //         key.clone().into_owned(),
+    //         value.clone().into_owned(), 
+    //     );
+    // }
+
+    // new_response.with_status_code(response.status_code)
 }

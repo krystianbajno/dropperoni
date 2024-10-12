@@ -389,6 +389,7 @@ dependencies = [
  "clap",
  "colored",
  "flate2",
+ "log",
  "pem",
  "pkcs8",
  "rand",
