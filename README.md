@@ -1,8 +1,5 @@
 # DROPPA
 When you need to drop a file, it needs to be simple, and **quick**.
-You have `nginx`, you have `python -m http.server`, sure.
-
-But this one here weights 3 megabytes, has upload, works everywhere, needs no configuration files, and generates TLS certificates during runtime.
 
 Portable cross-platform file upload/download server and an HTTPS reverse proxy written in Rust.
 
