@@ -6,13 +6,6 @@ But this one here weights 3 megabytes, has upload, works everywhere, needs no co
 
 Portable cross-platform file upload/download server and an HTTPS reverse proxy written in Rust.
 
-### Installation
-```bash
-iwr https://github.com/krystianbajno/droppa/releases/download/release/droppa-x86_64-windows.exe -outfile droppa.exe
-wget https://github.com/krystianbajno/droppa/releases/download/release/droppa-x86_64-linux
-wget https://github.com/krystianbajno/droppa/releases/download/release/droppa-aarch64-apple-darwin
-```
-
 ### Features
 - Serves files + Web GUI
 - Uploads files + Web GUI
