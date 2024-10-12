@@ -18,8 +18,11 @@ flate2 = "1.0.31"
 url = "2.2.2"
 colored = "2.0.0"
 ammonia = "4.0.0"
-log = "0.4"
+# log = "0.4"
 # simplelog = "0.11"
+
+[build-dependencies]
+static_vcruntime = "2.0"
 
 [profile.release]
 opt-level = "z" 

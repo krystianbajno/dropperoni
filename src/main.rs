@@ -10,16 +10,8 @@ use clap::{Arg, Command};
 use http::server;
 use proxy::proxy::start_ssl_proxy;
 
-// use simplelog::*;
-// use std::fs::File;
-
 #[tokio::main]
 async fn main() {
-    // let log_file = File::create("droppa.log").unwrap();
-    // CombinedLogger::init(vec![
-        // WriteLogger::new(LevelFilter::Info, Config::default(), log_file),
-    // ]).unwrap();
-
     let matches = Command::new("DROPPA")
         .version("1.0")
         .author("Krystian Bajno")

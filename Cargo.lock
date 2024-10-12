@@ -389,7 +389,6 @@ dependencies = [
  "clap",
  "colored",
  "flate2",
- "log",
  "pem",
  "pkcs8",
  "rand",
@@ -397,6 +396,7 @@ dependencies = [
  "rouille",
  "rsa",
  "rustls-pemfile",
+ "static_vcruntime",
  "tokio",
  "tokio-rustls",
  "url",
@@ -1297,6 +1297,12 @@ dependencies = [
  "base64ct",
  "der",
 ]
+
+[[package]]
+name = "static_vcruntime"
+version = "2.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "954e3e877803def9dc46075bf4060147c55cd70db97873077232eae0269dc89b"
 
 [[package]]
 name = "string_cache"
