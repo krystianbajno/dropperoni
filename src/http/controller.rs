@@ -2,6 +2,7 @@ use ammonia::clean;
 use rouille::input::multipart::{get_multipart_input, MultipartError};
 use rouille::{Request, Response};
 use std::fs::{self, File};
+use std::io::{Read, Write};
 use std::path::PathBuf;
 use std::sync::Arc;
 use crate::views::views::index_view;
@@ -65,9 +66,24 @@ pub fn store(request: &Request, dir: &Arc<PathBuf>) -> Response {
         if let Some(filename) = field.headers.filename.clone() {
             let sanitized_filename = clean(&filename);
             let filepath = dir.join(sanitized_filename.to_string());
-            let mut file = File::create(filepath).unwrap();
-            std::io::copy(&mut field.data, &mut file).unwrap();
-            return index(request, dir)
+
+            let mut file = match File::create(&filepath) {
+                Ok(file) => file,
+                Err(_) => return Response::text("Failed to create file").with_status_code(500),
+            };
+
+            let mut buffer = [0u8; 4096];
+            while let Ok(bytes_read) = field.data.read(&mut buffer) {
+                if bytes_read == 0 {
+                    break;
+                }
+
+                if let Err(_) = file.write_all(&buffer[..bytes_read]) {
+                    return Response::text("Failed to write file").with_status_code(500);
+                }
+            }
+
+            return index(request, dir);
         }
     }
 

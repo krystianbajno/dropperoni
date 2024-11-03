@@ -96,7 +96,7 @@ async fn handle_connection(
                     break;
                 }
                 println!("{}", format!("Read {} bytes from client", n).cyan());
-                println!("{}", format!("Client data:\n{}", String::from_utf8_lossy(&client_to_server_buffer[..n])).cyan());
+                // println!("{}", format!("Client data:\n{}", String::from_utf8_lossy(&client_to_server_buffer[..n])).cyan());
 
                 let modified_request = mitm_handler.process_request(&client_to_server_buffer[..n], &domain)?;
 
@@ -113,7 +113,7 @@ async fn handle_connection(
                             break;
                         }
                         println!("{}", format!("Read {} bytes from server", n).green());
-                        println!("{}", format!("Server data:\n{}", String::from_utf8_lossy(&server_to_client_buffer[..n])).green());
+                        // println!("{}", format!("Server data:\n{}", String::from_utf8_lossy(&server_to_client_buffer[..n])).green());
 
                         response_buffer.extend_from_slice(&server_to_client_buffer[..n]);
 
