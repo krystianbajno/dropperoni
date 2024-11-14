@@ -1,3 +1,6 @@
+[![CodeFactor](https://www.codefactor.io/repository/github/krystianbajno/dropperoni/badge)](https://www.codefactor.io/repository/github/krystianbajno/dropperoni)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/7a7fe7cb89264e308eb3a46cb8ea9a50)](https://app.codacy.com/gh/krystianbajno/dropperoni/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
+
 # DROPPA
 When you need to drop a file, it needs to be simple, and **quick**.
 
