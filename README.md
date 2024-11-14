@@ -1,4 +1,7 @@
 # DROPPA
+
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/da405986a8bc4832bc3e209b56beccb1)](https://app.codacy.com/gh/krystianbajno/dropperoni?utm_source=github.com&utm_medium=referral&utm_content=krystianbajno/dropperoni&utm_campaign=Badge_Grade)
+
 When you need to drop a file, it needs to be simple, and **quick**.
 
 Portable cross-platform file upload/download server and an HTTPS reverse proxy written in Rust.
