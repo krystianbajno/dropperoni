@@ -62,6 +62,8 @@ pub fn store(request: &Request, dir: &Arc<PathBuf>) -> Response {
         }
     };
 
+    let mut files_saved = 0;
+
     while let Some(mut field) = multipart.next() {
         if let Some(filename) = field.headers.filename.clone() {
             let sanitized_filename = clean(&filename);
@@ -77,15 +79,19 @@ pub fn store(request: &Request, dir: &Arc<PathBuf>) -> Response {
                 if bytes_read == 0 {
                     break;
                 }
-
+                
                 if let Err(_) = file.write_all(&buffer[..bytes_read]) {
                     return Response::text("Failed to write file").with_status_code(500);
                 }
             }
-
-            return index(request, dir);
+            
+            files_saved += 1;
         }
     }
 
-    Response::text("No file uploaded").with_status_code(400)
+    if files_saved > 0 {
+        return index(request, dir);
+    } else {
+        return Response::text("No files uploaded").with_status_code(400);
+    }
 }
